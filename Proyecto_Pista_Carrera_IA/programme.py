@@ -77,9 +77,7 @@ def update():
     if hit.hit and hit.entity == pista:
 
         DeloRean.y = hit.world_point.y
-        esfera.y = hit.world_point.x
-        #4.5 Y
-        print(hit.world_point.x)
+        
         
 
 
