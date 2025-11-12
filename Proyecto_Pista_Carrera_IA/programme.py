@@ -41,9 +41,9 @@ esfera = Entity(parent=DeloRean, model='sphere', color=color.red, scale=.3, posi
 # Cámara
 EditorCamera(pivot=DeloRean, position=(4.5, 2.90, 0), rotation=(25,0,0))
 
-vel = 0.25
+vel = 0.5
 def update():
-    EPS = 0.02        # tolerancia para considerar y≈0
+
     ADELANTE = 0.0    # pon 2.0 si quieres medir un poco al frente del carro
     i =0
 
@@ -75,8 +75,9 @@ def update():
     )
 
     if hit.hit and hit.entity == pista:
-
         DeloRean.y = hit.world_point.y
+        DeloRean.rotation.x = hit.world_point.y
+    print(DeloRean.position)
         
         
 
