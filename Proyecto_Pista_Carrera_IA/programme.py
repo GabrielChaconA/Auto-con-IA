@@ -1,52 +1,20 @@
-# pip install ursina
 from ursina import *
-from pathlib import Path
-
 app = Ursina()
 
 
-# Ruta de assets relativa al .py
-base_path = Path(__file__).parent
-application.asset_folder = base_path / "Modelos 3d"
+from src.modelos.modelos import DeloRean,pista,esfera
+
+from src.Movimientos_Carro.movimientos import avanzar,mov_der,mov_izq,retroceder
 
 
-# === PISTA ===
-pista = Entity(
-    model='FullTrack.obj',
-    texture='Main.png',
-    color=color.light_gray,
-    scale=15,
-    position=(0, 0, 0),
-    rotation=(0, 0, 0),
-    double_sided=True,
-    shadows=True,
-    collider='mesh'        
-)
 
 
-# === CARRO ===
-DeloRean = Entity(
-    model='DeLorean.obj',
-    color=color.light_gray,
-    scale=(-0.02, 0.02, 0.02 ),
-    position=(4.5, 2.90, 0),
-    rotation=(0, 0, 0),
-    double_sided=True
-)
 
-# Esfera a cierta distancia delante del carro (hija del pivot)
-lead_dist = 6
-esfera = Entity(parent=DeloRean, model='sphere', color=color.red, scale=.3, position=(0,0,6))
-
-# Cámara
-EditorCamera(pivot=DeloRean, position=(4.5, 2.90, 0), rotation=(25,0,0))
-
-vel = 0.5
 def update():
+    camera.position = DeloRean.position+Vec3(5,25,0)
+    camera.look_at(DeloRean) 
 
-    ADELANTE = 0.0    # pon 2.0 si quieres medir un poco al frente del carro
-    i =0
-
+    ADELANTE = 0.0   
 
     # Dirección HACIA la esfera usando POSICIÓN MUNDIAL
     direccion = (esfera.world_position - DeloRean.world_position)
@@ -56,13 +24,14 @@ def update():
 
     # MOVER EL CARRO
     if held_keys['w']:
-        DeloRean.position += direccion * vel
+        print("hoLA")
+        avanzar(direccion)
     if held_keys['s']:
-        DeloRean.position -= direccion * vel
+        retroceder(direccion)
     if held_keys['a']: 
-        DeloRean.rotation_y -= 1
+        mov_izq()
     if held_keys['d']:
-        DeloRean.rotation_y += 1
+        mov_der()
 
     origin = DeloRean.world_position + DeloRean.forward * ADELANTE + Vec3(0, 1, 0)
 
@@ -77,15 +46,7 @@ def update():
     if hit.hit and hit.entity == pista:
         DeloRean.y = hit.world_point.y
         DeloRean.rotation.x = hit.world_point.y
-    print(DeloRean.position)
-        
-        
-
-
-           
-    
-     
-    
+   
 
             
 
