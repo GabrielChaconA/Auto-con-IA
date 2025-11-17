@@ -24,9 +24,9 @@ pista = Entity(
 # === Estadio ===
 Estadio = Entity(
     color=color.light_gray,
-    model='sports stadium.obj',
-    scale=0.05,
-    position=(-1, -1, -1),
+    model='Estadio.obj',
+    scale=0.13,
+    position=(30, 0, 30),
     rotation=(0, 0, 0),
     double_sided=True,
        
@@ -51,3 +51,12 @@ esfera = Entity(
       position=(0,0,6))
 
 
+# === SUELO VERDE ===
+suelo = Entity(
+    model='plane',
+    scale=250,                 # grande para cubrir toda la pista
+    color=color.gray,         # color verde
+    position=(0, -0.1, 0),     # un poquito abajo de la pista para que no parpadee
+    rotation=(0, 0, 0),       # para que quede horizontal
+    collider=None
+)

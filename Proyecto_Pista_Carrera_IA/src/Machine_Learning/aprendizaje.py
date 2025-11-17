@@ -103,5 +103,6 @@ def lear_form():
     )
 
     state = next_state
-
+    
+    print("Estado:", state, " Acción:", action, "  Q:", Q[state])
 
