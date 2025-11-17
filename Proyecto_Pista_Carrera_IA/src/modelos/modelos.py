@@ -39,3 +39,5 @@ esfera = Entity(
       color=color.red, 
       scale=.3, 
       position=(0,0,6))
+
+
