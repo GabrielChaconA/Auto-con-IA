@@ -1,0 +1,153 @@
+newmtl default_dash
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/ft.jpg
+
+newmtl default
+d 0.65
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 0.239216 0.419608 0.501961
+Ks 1 1 1
+Km 0
+
+newmtl default_red
+d 1
+Ns 1
+Ni 0
+Ka 1 0 0
+Kd 1 0 0
+Ks 1 1 1
+Km 0
+
+newmtl default_grid
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d//Maps/sb1.jpg
+
+newmtl default_stripes
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 0.231373 0.101961
+Ks 1 1 1
+Km 0
+
+newmtl default_metal_parts
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+
+newmtl default_parashute
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 0.231373 0.101961
+Ks 1 1 1
+Km 0
+
+newmtl default_body
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/wa1.jpg
+
+newmtl default_signal_lights
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/dbq1.jpg
+
+newmtl default_instruments
+d 1
+Ns 1
+Ni 0
+Ka 1 1 1
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/1pm1.jpg
+
+newmtl default_shift
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+
+newmtl default_tires
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/xcv1.jpg
+
+newmtl default_cushions
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/yx1_02_01_01.jpg
+
+newmtl default_seats
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/ft.jpg
+
+newmtl default_rims2
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+
+newmtl default_simbol_rims
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 1 1 1
+Ks 1 1 1
+Km 0
+C:\Users\gaboc\OneDrive\Documentos\TECMORELIA\Quinto semestre\Proyecto de graficación\Proyecto_Pista_Carrera_IA\Modelos_3d/Maps/sgn1.jpg
+

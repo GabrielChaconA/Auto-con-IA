@@ -21,8 +21,8 @@ pista = Entity(
     shadows=True,
     collider='mesh'        
 )
-# === Estadio ===
-Estadio = Entity(
+""" # === Estadio ===
+Estadio = Entity(fffff
     color=color.light_gray,
     model='Estadio.obj',
     scale=0.13,
@@ -30,13 +30,13 @@ Estadio = Entity(
     rotation=(0, 0, 0),
     double_sided=True,
        
-)
+) """
 
 
 # === CARRO ===
 DeloRean = Entity(
-    model='DeLorean.obj',
-    color=color.light_gray,
+    model='batimobilahorasi.obj',
+   
     scale=(-0.02, 0.02, 0.02 ),
     position=(4.5, 2.90, 0),
     rotation=(0, 0, 0),
@@ -60,3 +60,9 @@ suelo = Entity(
     rotation=(0, 0, 0),       # para que quede horizontal
     collider=None
 )
+esfera_meta = Entity(
+    parent=DeloRean, 
+    model='sphere',
+      color=color.red, 
+      scale=3, 
+      position=(13.918956, 2.683757, -18.438091))

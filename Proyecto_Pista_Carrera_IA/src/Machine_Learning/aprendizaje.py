@@ -1,108 +1,216 @@
-from src.Movimientos_Carro.movimientos import *
-from ursina import Vec3, distance, raycast, scene
-from collections import defaultdict
-import random
+# src/control_auto.py
 
-n_actions = 4
-alpha = 0.5
-gamma = 0.9
-epsilon = 0.3
+from ursina import Vec3, distance, raycast, scene, time
+import math
 
-Q = defaultdict(lambda: [0.0] * n_actions)
+# Ajusta este import a donde tengas definidas estas cosas:
+# Deben existir: DeloRean (carro) y pista (Entity de la pista)
+from src.Movimientos_Carro.movimientos import DeloRean, pista
 
-state = None
-done = False
+# =========================
+#   CONFIGURACIÓN
+# =========================
 
-meta = Vec3(13.918956, 2.683757, -18.438091)
-last_distance = None
+ALTURA_COCHE    = 0.5     # separación vertical sobre la pista
+VEL_AVANCE      = 6.0     # velocidad de avance (unidades/seg)
+VEL_GIRO_MAX    = 90.0    # giro máximo por segundo (grados/seg)
+ANGLE_DEADZONE  = 5.0     # si el ángulo es menor, no gira (solo avanza)
+WAYPOINT_RADIUS = 2.5     # distancia para considerar que llegó a un waypoint
+
+# Puntos de la pista (EJEMPLOS – CAMBIA ESTOS POR LOS DE TU PISTA)
+# Pon puntos siguiendo el recorrido de la pista en orden.
+WAYPOINTS = [
+    Vec3(0,   0,   0),
+    Vec3(10,  0,   5),
+    Vec3(20,  0,   0),
+    Vec3(30,  0, -10),
+    Vec3(20,  0, -20),
+    Vec3(10,  0, -18),
+    # Ejemplo: meta aproximada
+    # Vec3(13.9, 0, -18.4),
+]
+
+current_wp = 0   # índice del waypoint actual
 
 
-def elegir_accion(estado):
-    if random.random() < epsilon:
-        return random.randint(0, n_actions - 1)
-    q_vals = Q[estado]
-    max_q = max(q_vals)
-    mejores = [a for a, q in enumerate(q_vals) if q == max_q]
-    return random.choice(mejores)
+# =========================
+#   BUSCAR PISTA ARRIBA / ABAJO
+# =========================
+def encontrar_pista_vertical(pos: Vec3, altura_busqueda=10) -> Vec3 | None:
+    """
+    Busca la pista arriba o abajo del punto 'pos'.
 
+    1. Lanza un raycast desde ARRIBA hacia ABAJO.
+    2. Si no encuentra, lanza desde ABAJO hacia ARRIBA.
 
-def award():
-    global last_distance
+    Si encuentra la pista, devuelve el punto de impacto (world_point).
+    Si no encuentra nada, devuelve None.
+    """
 
-    origin = DeloRean.world_position + Vec3(0, 1, 0)
-    hit = raycast(
-        origin=origin,
+    # 1) Desde arriba hacia abajo
+    origin_up = pos + Vec3(0, altura_busqueda, 0)
+    hit_down = raycast(
+        origin=origin_up,
         direction=Vec3(0, -1, 0),
-        distance=100,
+        distance=altura_busqueda * 2,
         ignore=(DeloRean,),
         traverse_target=scene
     )
 
-    if not hit.hit or hit.entity != pista:
-        return -1.0
+    if hit_down.hit and hit_down.entity == pista:
+        return hit_down.world_point
 
-    d = distance(DeloRean.world_position, meta)
-
-    if last_distance is None:
-        last_distance = d
-        return 0.0
-
-    if d < last_distance:
-        last_distance = d
-        return 0.5
-
-    last_distance = d
-    return -0.2
-
-
-def ejecutar_acciones(accion):
-    direccion = direction()
-    if accion == 0:
-        avanzar(direccion)
-    elif accion == 1:
-        retroceder(direccion)
-    elif accion == 2:
-        mov_izq()
-    elif accion == 3:
-        mov_der()
-
-
-def normalizar():
-    x = int(DeloRean.x)
-    z = int(DeloRean.z)
-    return (x, z)
-
-
-def step(accion):
-    ejecutar_acciones(accion)
-    nuevo_estado = normalizar()
-    recompensa = award()
-    terminado = False
-    return nuevo_estado, recompensa, terminado
-
-
-def reset_episode():
-    global state, done, last_distance
-    state = normalizar()
-    done = False
-    last_distance = None
-
-
-def lear_form():
-    global state, done, Q
-
-    if state is None or done:
-        reset_episode()
-
-    action = elegir_accion(state)
-    next_state, reward, done = step(action)
-    best_next = max(Q[next_state])
-
-    Q[state][action] = Q[state][action] + alpha * (
-        reward + gamma * best_next - Q[state][action]
+    # 2) Desde abajo hacia arriba (por si el coche está debajo de la pista)
+    origin_down = pos - Vec3(0, altura_busqueda, 0)
+    hit_up = raycast(
+        origin=origin_down,
+        direction=Vec3(0, 1, 0),
+        distance=altura_busqueda * 2,
+        ignore=(DeloRean,),
+        traverse_target=scene
     )
 
-    state = next_state
-    
-    print("Estado:", state, " Acción:", action, "  Q:", Q[state])
+    if hit_up.hit and hit_up.entity == pista:
+        return hit_up.world_point
 
+    return None
+
+
+def ajustar_altura_sobre_pista() -> bool:
+    """
+    Ajusta la altura del coche para que quede encima de la pista,
+    buscando tanto arriba como abajo de su posición actual.
+
+    Devuelve True si encontró pista y ajustó altura,
+    False si no hay pista ni arriba ni abajo.
+    """
+    pos = DeloRean.world_position
+    hit_point = encontrar_pista_vertical(pos)
+
+    if hit_point is not None:
+        DeloRean.y = hit_point.y + ALTURA_COCHE
+        return True
+
+    return False
+
+
+# =========================
+#   RECUPERACIÓN SI SE SALE
+# =========================
+def recuperar_si_fuera_de_pista() -> bool:
+    """
+    Si el coche NO tiene pista ni arriba ni abajo:
+
+      - Mira un poco ENFRENTE (adelante) y realiza la misma búsqueda
+        vertical (arriba/abajo) en ese punto.
+      - Si hay pista enfrente, avanza hacia allí.
+      - Si tampoco hay, gira sobre sí mismo buscando pista.
+
+    Devuelve:
+      True  -> ya está sobre la pista (ok, se puede seguir lógica normal).
+      False -> sigue intentando recuperarse.
+    """
+    # 1. Intentar ajustar altura justo donde está el coche.
+    if ajustar_altura_sobre_pista():
+        return True  # ya está sobre la pista
+
+    # 2. No hay pista ni arriba ni abajo -> mirar ENFRENTE
+    forward = DeloRean.forward
+    forward_flat = Vec3(forward.x, 0, forward.z).normalized()
+
+    pos = DeloRean.world_position
+    pos_frente = pos + forward_flat * 3   # un poco al frente en XZ
+
+    hit_frente = encontrar_pista_vertical(pos_frente)
+
+    if hit_frente is not None:
+        # Hay pista enfrente (arriba o abajo):
+        # -> movemos el coche un poco hacia adelante en XZ,
+        # y ajustamos altura hacia ese punto.
+        DeloRean.position += forward_flat * VEL_AVANCE * time.dt
+
+        # Ajustar altura hacia el punto de pista encontrado
+        DeloRean.y = hit_frente.y + ALTURA_COCHE
+        return False  # seguimos en recuperación este frame
+
+    # 3. No hay pista ni donde está ni enfrente -> girar en su lugar
+    DeloRean.rotation_y += VEL_GIRO_MAX * time.dt  # gira a la izquierda
+    return False
+
+
+# =========================
+#   CONTROL PRINCIPAL
+# =========================
+def control_auto():
+    """
+    Lógica simple para que el carro siga la pista hasta la meta,
+    SIN ML, usando:
+
+      - Waypoints.
+      - Raycasts arriba/abajo.
+      - Búsqueda de pista enfrente si se sale.
+
+    Llamar esta función en tu update():
+
+        from src.control_auto import control_auto
+
+        def update():
+            control_auto()
+    """
+    global current_wp
+
+    if not WAYPOINTS:
+        return  # por seguridad
+
+    # 1. Asegurarnos de estar sobre la pista o en recuperación
+    if not recuperar_si_fuera_de_pista():
+        # Todavía está intentando regresar a la pista,
+        # este frame NO hacemos lógica de waypoints.
+        return
+
+    # 2. Ya está sobre la pista → seguir waypoints
+    target = WAYPOINTS[current_wp]
+
+    # Posición actual en XZ
+    pos = DeloRean.world_position
+    pos_flat = Vec3(pos.x, 0, pos.z)
+    target_flat = Vec3(target.x, 0, target.z)
+
+    # 2.1. ¿Llegamos al waypoint actual?
+    dist_wp = distance(pos_flat, target_flat)
+    if dist_wp < WAYPOINT_RADIUS:
+        # Modo "llega a la meta una sola vez"
+        current_wp = min(current_wp + 1, len(WAYPOINTS) - 1)
+
+        # Si quieres bucle infinito, usa:
+        # current_wp = (current_wp + 1) % len(WAYPOINTS)
+
+        target = WAYPOINTS[current_wp]
+        target_flat = Vec3(target.x, 0, target.z)
+
+    # 3. Calcular ángulo hacia el waypoint
+    to_target = (target_flat - pos_flat).normalized()
+
+    forward = DeloRean.forward
+    forward_flat = Vec3(forward.x, 0, forward.z).normalized()
+
+    dot = forward_flat.x * to_target.x + forward_flat.z * to_target.z
+    det = forward_flat.x * to_target.z - forward_flat.z * to_target.x
+
+    angle_deg = math.degrees(math.atan2(det, dot))
+    # angle_deg > 0  → waypoint a la izquierda
+    # angle_deg < 0  → waypoint a la derecha
+
+    # 4. Girar suavemente hacia el waypoint
+    if abs(angle_deg) > ANGLE_DEADZONE:
+        max_step = VEL_GIRO_MAX * time.dt
+        giro = max(-max_step, min(max_step, angle_deg))
+        DeloRean.rotation_y += giro
+
+    # 5. Avanzar hacia adelante
+    forward = DeloRean.forward
+    forward_flat = Vec3(forward.x, 0, forward.z).normalized()
+    DeloRean.position += forward_flat * VEL_AVANCE * time.dt
+
+    # 6. Volver a ajustar altura (por si cambió ligeramente el nivel)
+    ajustar_altura_sobre_pista()
